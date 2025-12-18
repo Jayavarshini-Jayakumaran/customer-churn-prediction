@@ -18,8 +18,7 @@ models/*.pkl
 models/*.joblib
 
 # Reports & Figures
-reports/figures/
-reports/final_report.pdf
+reports/
 
 # Logs
 *.log
