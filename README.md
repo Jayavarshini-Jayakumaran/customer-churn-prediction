@@ -51,6 +51,10 @@ The model estimates potential revenue loss from high-risk customers, enabling:
 - Optimized budget allocation
 - Business-aligned decision-making
 
+## 🔄 Model Monitoring & Retraining Strategy
+- Model performance should be monitored regularly using ROC–AUC and churn distribution.
+- The model should be retrained **quarterly** or whenever significant shifts in customer churn behavior are observed.
+
 ## 📤 Model Output
 Customer-level churn probabilities are saved as:
 
@@ -85,3 +89,4 @@ python main.py
 This project is licensed under the [MIT License](LICENSE).
 
 <p align="center"><b>Finish what you started 💻 </b></p>
+
