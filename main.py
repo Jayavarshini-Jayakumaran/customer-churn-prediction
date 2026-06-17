@@ -5,23 +5,23 @@ from src.train_model import train
 from src.evaluate_model import evaluate
 
 
-# Load raw data
+# Load raw data 
 raw_df = pd.read_csv("data/raw/customer_churn_raw.csv")
 raw_df.columns = raw_df.columns.str.strip()
 
 # Feature engineering
 raw_df = add_features(raw_df)
 
-# Preprocessing
+# Preprocessing (scaling + encoding)
 X_processed, y, raw_features = preprocess_data(raw_df)
 
-# Train model
+# Train (split FIRST, then SMOTE on train fold only)
 model, X_test, y_test = train(X_processed, y)
 
-# Evaluate
-results = evaluate(X_test, y_test, raw_features)
+# Evaluate (model passed explicitly — no hidden file-system load)
+results = evaluate(model, X_test, y_test, raw_features)
 
-# OUTPUTS & REPORTING
+# Outputs & reporting 
 print("\n📁 Detailed customer-level risk scores saved to:")
 print(results["output_path"])
 
@@ -34,7 +34,7 @@ for i, row in enumerate(results["top_features"].itertuples(), 1):
         .replace("cat__", "")
         .replace("_", " ")
     )
-    print(f"{i}. {clean_name}")
+    print(f"  {i}. {clean_name}")
 
 summary = results["summary"]
 
@@ -54,6 +54,6 @@ print(
 print("\nInterpretation:")
 print(
     "- Model shows strong churn discrimination\n"
-    "- High-risk customers should be prioritized for retention\n"
-    "- Revenue-at-risk helps optimize retention budget allocation"
+    "- High-risk customers should be prioritised for retention\n"
+    "- Revenue-at-risk helps optimise retention budget allocation"
 )
