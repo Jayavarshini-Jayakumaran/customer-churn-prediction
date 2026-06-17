@@ -37,7 +37,7 @@ These features convert raw operational data into meaningful business indicators.
 ## 🤖 Model Development
 - **Models evaluated**: Logistic Regression, Decision Tree, Random Forest
 - **Final Model Selected**: Random Forest
-- **Class imbalance handling**: SMOTE
+- **Class imbalance handling**: SMOTE, applied to the training fold only — **after** the train/test split, to prevent synthetic rows from leaking into evaluation
 
 ## 🔥 Churn Risk Segmentation
 Customers are categorized into:
@@ -67,6 +67,11 @@ customer-churn-prediction/
 │   ├── raw/
 │   └── processed/
 ├── notebooks/
+│   ├── 01_exploration.ipynb         # EDA
+│   ├── 02_preprocessing.ipynb       # cleaning + encoding, via src/ functions
+│   ├── 03_feature_engineering.ipynb # rationale & validation for engineered features
+│   ├── 04_model_training.ipynb      # model comparison + production training
+│   └── 05_evaluation.ipynb          # diagnostics + business summary
 ├── src/
 ├── models/
 ├── reports/
@@ -74,6 +79,33 @@ customer-churn-prediction/
 ├── requirements.txt
 └── README.md
 ```
+
+## 🛠 Notes on Pipeline Fixes
+A few issues were identified and corrected to keep the notebooks and `src/`
+pipeline in sync and to make the saved outputs trustworthy:
+
+- **Train/test leakage:** SMOTE is now applied only to the training fold,
+  *after* the train/test split (`src/train_model.py`), instead of before
+  splitting. As a result, current ROC-AUC / recall / accuracy figures will
+  be lower than any numbers quoted in older reports — that's the expected,
+  leakage-free result, not a regression.
+- **Customer-level output alignment:** `src/evaluate_model.py` now matches
+  each predicted churn probability to the correct customer via the test
+  set's original index, rather than assuming row order. This was silently
+  wrong before and affected both `data/processed/churn_risk_scores.csv`
+  and the revenue-at-risk figure (the ROC-AUC score itself was unaffected).
+- **Redundant features:** `src/feature_engineering.py` now drops the raw
+  `TotalRevenue`, `AvgMobileRevenue`, and `AvgFIXRevenue` columns once
+  they've been used to build the engineered ratio/flag features, avoiding
+  duplicate/multicollinear signal going into the model.
+- **Notebook ↔ src alignment:** notebooks `02`–`05` now import and call
+  the real functions in `src/` directly instead of re-implementing the
+  logic inline, so they can't silently drift out of sync with what
+  `main.py` actually runs. `03_feature_engineering.ipynb` (previously an
+  empty file) is now a feature-rationale/validation notebook, and the old
+  `04_evaluation.ipynb` — which referenced a non-existent
+  `03_modeling_training.ipynb` — has been renamed to `05_evaluation.ipynb`
+  and corrected.
 
 ## 🚀 How to Run the Project
 ``` bash

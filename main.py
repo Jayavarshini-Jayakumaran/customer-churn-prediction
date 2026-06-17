@@ -5,9 +5,16 @@ from src.train_model import train
 from src.evaluate_model import evaluate
 
 
-# Load raw data 
+# Load raw data
 raw_df = pd.read_csv("data/raw/customer_churn_raw.csv")
-raw_df.columns = raw_df.columns.str.strip()
+
+# FIX (column-name mismatch): every notebook strips whitespace AND replaces
+# remaining spaces with underscores (e.g. "Total SUBs" -> "Total_SUBs"). This
+# script previously only stripped, so if the raw CSV headers contain spaces
+# instead of underscores, downstream column lookups (e.g. "Total_SUBs" in
+# feature_engineering.py) would raise a KeyError. Aligned with the notebooks
+# here so both paths parse the same raw file identically.
+raw_df.columns = raw_df.columns.str.strip().str.replace(" ", "_")
 
 # Feature engineering
 raw_df = add_features(raw_df)
