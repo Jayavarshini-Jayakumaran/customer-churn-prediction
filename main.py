@@ -1,78 +1,87 @@
-import pandas as pd
-from src.feature_engineering import add_features
-from src.data_preprocessing import preprocess_data
-from src.train_model import train
-from src.evaluate_model import evaluate
-from src.utils import interpret_auc
+"""
+main.py — Customer Churn Prediction Pipeline
+----------------------------------------
+Orchestrates the full ML pipeline by importing from src/:
 
+    src/preprocess.py  — load, clean, feature-engineer, encode, split
+    src/train.py       — train 4 models with SMOTE, select best
+    src/score.py       — score all customers, compute business metrics
+    src/display.py     — all terminal output (no plots, no file saves)
 
-# Load raw data
-raw_df = pd.read_csv("data/raw/customer_churn_raw.csv")
+Run:
+    python main.py
+"""
 
-# FIX (column-name mismatch): every notebook strips whitespace AND replaces
-# remaining spaces with underscores (e.g. "Total SUBs" -> "Total_SUBs"). This
-# script previously only stripped, so if the raw CSV headers contain spaces
-# instead of underscores, downstream column lookups (e.g. "Total_SUBs" in
-# feature_engineering.py) would raise a KeyError. Aligned with the notebooks
-# here so both paths parse the same raw file identically.
-raw_df.columns = raw_df.columns.str.strip().str.replace(" ", "_")
+import os, sys, warnings
+warnings.filterwarnings("ignore")
 
-# Feature engineering
-raw_df = add_features(raw_df)
+# Allow: python main.py from any working directory
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
-# Preprocessing (scaling + encoding)
-X_processed, y, raw_features = preprocess_data(raw_df)
-
-# Train (split FIRST, then SMOTE on train fold only)
-model, X_test, y_test = train(X_processed, y)
-
-# Evaluate (model passed explicitly — no hidden file-system load)
-results = evaluate(model, X_test, y_test, raw_features)
-
-# Outputs & reporting 
-print("\n📁 Detailed customer-level risk scores saved to:")
-print(results["output_path"])
-
-print("\n🔍 Feature Impact Explanation")
-print("Top churn drivers:")
-for i, row in enumerate(results["top_features"].itertuples(), 1):
-    clean_name = (
-        row.Feature
-        .replace("num__", "")
-        .replace("cat__", "")
-        .replace("_", " ")
-    )
-    print(f"  {i}. {clean_name}")
-
-summary = results["summary"]
-
-print("\n📊 BUSINESS SUMMARY")
-print("-" * 50)
-print(f"ROC–AUC Score            : {summary['roc_auc']}")
-
-print("\nChurn Risk Distribution:")
-for k, v in summary["risk_distribution"].items():
-    print(f"  {k:<25}: {v}%")
-
-print(
-    f"\nEstimated Revenue at Risk: "
-    f"{summary['revenue_at_risk']:,.2f} monetary units"
+from preprocess import load_and_clean, engineer_features, encode_and_split
+from train      import train_all, get_feature_importance
+from score      import score_all_customers, revenue_summary
+from display    import (
+    print_header,
+    print_dataset_overview,
+    print_model_comparison,
+    print_best_model_metrics,
+    print_confusion_matrix,
+    print_feature_importance,
+    print_risk_distribution,
+    print_revenue_summary,
+    print_sample_scores,
+    print_recommendations,
+    print_footer,
 )
 
-# FIX (hardcoded interpretation): this block used to always print "Model
-# shows strong churn discrimination" no matter what the ROC-AUC actually
-# was. interpret_auc() now derives the label — and whether the risk tiers /
-# revenue-at-risk figures are trustworthy enough to act on — from the real
-# score, so the printed narrative can't silently contradict the metrics
-# above it.
-label, is_reliable = interpret_auc(summary["roc_auc"])
+# ── Config ─────────────────────────────────────────────────────────────
+RAW_PATH = os.path.join(os.path.dirname(__file__), "data", "raw", "telco_churn.csv")
 
-print("\nInterpretation:")
-print(f"- Model shows {label} churn discrimination (ROC–AUC = {summary['roc_auc']})")
 
-if is_reliable:
-    print("- High-risk customers should be prioritised for retention")
-    print("- Revenue-at-risk helps optimise retention budget allocation")
-else:
-    print("- Discrimination is too low to act on the risk tiers or revenue-at-risk figures above")
-    print("- Treat these outputs as exploratory only until feature engineering or model selection improves ROC–AUC")
+# ══════════════════════════════════════════════════════════════════════
+#  PIPELINE
+# ══════════════════════════════════════════════════════════════════════
+
+print_header()
+
+# 1. Load & preprocess
+df_raw  = load_and_clean(RAW_PATH)
+df_feat = engineer_features(df_raw)
+
+(X_train, X_test, y_train, y_test,
+ X_train_sc, X_test_sc,
+ scaler, imputer,
+ feature_names) = encode_and_split(df_feat)
+
+print_dataset_overview(df_raw, X_train, X_test)
+
+# 2. Train
+results, best_name = train_all(X_train_sc, y_train, X_test_sc, y_test)
+best = results[best_name]
+
+print_model_comparison(results, best_name)
+print_best_model_metrics(best_name, best)
+print_confusion_matrix(best)
+
+# 3. Feature importance
+fi_df = get_feature_importance(best["model"], feature_names)
+print_feature_importance(fi_df, top_n=12)
+
+# 4. Score all customers
+# Re-encode full dataset (same steps as encode_and_split, no split)
+from sklearn.preprocessing import LabelEncoder
+df_enc = engineer_features(load_and_clean(RAW_PATH)).drop(columns=["customerID", "Churn"])
+le = LabelEncoder()
+for col in df_enc.select_dtypes(include=["object", "category"]).columns:
+    df_enc[col] = le.fit_transform(df_enc[col].astype(str))
+
+scored  = score_all_customers(df_raw, best["model"], scaler, imputer, df_enc)
+summary = revenue_summary(scored, best["roc_auc"])
+
+# 5. Display results
+print_risk_distribution(summary)
+print_revenue_summary(summary)
+print_sample_scores(scored, n=10)
+print_recommendations(summary, fi_df, best_name)
+print_footer()

@@ -11,7 +11,6 @@ venv/
 # Data Files
 data/raw/
 data/processed/
-!data/processed/feature_importance.csv
 
 # Models & Artifacts
 models/*.pkl
