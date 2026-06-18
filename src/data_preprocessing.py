@@ -21,10 +21,10 @@ def preprocess_data(df):
     df.columns = df.columns.str.strip().str.replace(" ", "_")
 
     # Remove non-informative identifiers and high-cardinality columns.
-    # Billing_ZIP and KA_name have hundreds of unique values — one-hot encoding
-    # them produces ~470 of the 487 columns, causing SMOTE to run out of memory
-    # while adding no real churn signal (confirmed in EDA: ZIP had near-zero
-    # correlation with any target or revenue feature).
+    # Billing_ZIP encodes hundreds of unique values → one-hot explodes to ~400 columns,
+    # consuming ~22 MB just for SMOTE's nearest-neighbour arrays and adding no churn signal
+    # (confirmed near-zero correlation in EDA).  KA_name is a free-text account name with
+    # the same problem.  Both are dropped before encoding.
     df = df.drop(
         columns=["PID", "Suspended_subscribers", "Billing_ZIP", "KA_name"],
         errors="ignore",

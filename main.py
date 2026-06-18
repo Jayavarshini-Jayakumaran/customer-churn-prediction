@@ -3,6 +3,7 @@ from src.feature_engineering import add_features
 from src.data_preprocessing import preprocess_data
 from src.train_model import train
 from src.evaluate_model import evaluate
+from src.utils import interpret_auc
 
 
 # Load raw data
@@ -58,9 +59,20 @@ print(
     f"{summary['revenue_at_risk']:,.2f} monetary units"
 )
 
+# FIX (hardcoded interpretation): this block used to always print "Model
+# shows strong churn discrimination" no matter what the ROC-AUC actually
+# was. interpret_auc() now derives the label — and whether the risk tiers /
+# revenue-at-risk figures are trustworthy enough to act on — from the real
+# score, so the printed narrative can't silently contradict the metrics
+# above it.
+label, is_reliable = interpret_auc(summary["roc_auc"])
+
 print("\nInterpretation:")
-print(
-    "- Model shows strong churn discrimination\n"
-    "- High-risk customers should be prioritised for retention\n"
-    "- Revenue-at-risk helps optimise retention budget allocation"
-)
+print(f"- Model shows {label} churn discrimination (ROC–AUC = {summary['roc_auc']})")
+
+if is_reliable:
+    print("- High-risk customers should be prioritised for retention")
+    print("- Revenue-at-risk helps optimise retention budget allocation")
+else:
+    print("- Discrimination is too low to act on the risk tiers or revenue-at-risk figures above")
+    print("- Treat these outputs as exploratory only until feature engineering or model selection improves ROC–AUC")
