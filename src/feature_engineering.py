@@ -4,27 +4,18 @@ import pandas as pd
 def add_features(df):
     """Create business-relevant behavioral and value-based features.
 
-    All engineered columns use the original raw column names so that the output
-    DataFrame is consistent with what data_preprocessing.py expects as input.
-
-    FIX (redundant raw columns): TotalRevenue, AvgMobileRevenue, and
-    AvgFIXRevenue are now dropped once they've been used to build the
-    engineered ratio/flag features below. Previously these raw columns were
-    left in the frame alongside both Total_Revenue (an exact duplicate of
-    TotalRevenue, kept here only because evaluate_model.py / utils.py need a
-    revenue column for business reporting after the raw columns are gone)
-    and the engineered ratio features that were meant to replace them —
-    feeding the model duplicate/multicollinear signal for no benefit. This
-    mirrors the intent of notebook step 8.11, which dropped the same columns.
+    Raw revenue columns (TotalRevenue, AvgMobileRevenue, AvgFIXRevenue) are
+    dropped after the engineered features are derived from them, so the model
+    receives ratio/flag features instead of duplicate raw signal.
+    Total_Revenue is kept as a reporting column for revenue_at_risk() in utils.
     """
 
     df = df.copy()
 
-    # Revenue base (kept as Total_Revenue so utils.revenue_at_risk can still
-    # reference a revenue column after TotalRevenue itself is dropped below)
+    # Keep a copy for business reporting (utils.revenue_at_risk needs it)
     df["Total_Revenue"] = df["TotalRevenue"]
 
-    # Revenue per subscriber (+ 1 avoids division-by-zero)
+    # Revenue per subscriber — normalises spend by subscription count
     df["Revenue_per_Sub"] = df["Total_Revenue"] / (df["Total_SUBs"] + 1)
 
     # Engagement score: fraction of subscriptions that are active
@@ -40,23 +31,20 @@ def add_features(df):
     df["FIX_User"] = (df["AvgFIXRevenue"] > 0).astype(int)
 
     # Multi-service flag: customer uses both mobile and FIX services
-    # (deliberately revenue/service-mix based rather than subscription-count
-    # based, so the feature name matches what it actually measures)
     df["Multi_Service"] = (
         (df["AvgMobileRevenue"] > 0) & (df["AvgFIXRevenue"] > 0)
     ).astype(int)
 
-    # High-value customer: top 10 % by total revenue
+    # High-value customer: top 10% by total revenue
     revenue_threshold = df["Total_Revenue"].quantile(0.9)
     df["High_Value_Customer"] = (df["Total_Revenue"] >= revenue_threshold).astype(int)
 
-    # Interaction feature: value x engagement
+    # Interaction: high revenue × low engagement = high-risk profile
     df["Value_Engagement_Interaction"] = df["Revenue_per_Sub"] * df["Engagement_Score"]
 
-    # Drop raw revenue columns now that they're represented by the engineered
-    # ratio/flag features above (and by Total_Revenue, which is kept for
-    # business reporting). Prevents duplicate/multicollinear signal reaching
-    # the model.
+    # Drop raw revenue columns — they are now represented by the engineered
+    # features above. Leaving them in feeds the model duplicate/multicollinear
+    # signal and crowds out the ratio features.
     df = df.drop(columns=["TotalRevenue", "AvgMobileRevenue", "AvgFIXRevenue"])
 
     return df

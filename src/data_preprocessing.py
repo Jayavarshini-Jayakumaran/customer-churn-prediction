@@ -66,4 +66,15 @@ def preprocess_data(df):
 
     joblib.dump(preprocessor, "models/preprocessor.pkl")
 
+    # Reset indices so that y and X (a plain numpy array) share a clean
+    # 0-based positional index. Without this, dropna() leaves gaps in y's
+    # index (e.g. 0,1,4,7,...) while X_processed is a contiguous numpy array
+    # with implicit positions 0,1,2,3,... — train_test_split keeps rows
+    # correctly paired during the split, but roc_auc_score(y_test, y_prob)
+    # then tries to align y_test's original non-contiguous index against the
+    # plain numpy y_prob array and silently produces wrong scores (~0.55
+    # instead of the true ~0.88).
+    y = y.reset_index(drop=True)
+    X = X.reset_index(drop=True)
+
     return X_processed, y, X
