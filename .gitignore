@@ -1,36 +1,25 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
 
-# Virtual Environment
+# Virtual environment
 venv/
-.env/
-.env.*
+.env
 
-# Data Files
+# Data (never commit raw data)
 data/raw/
 data/processed/
 
-# Models & Artifacts
-models/*.pkl
-models/*.joblib
+# Trained models
+models/
 
-# Reports & Figures
-reports/
+# Jupyter checkpoints
+.ipynb_checkpoints/
 
-# Logs
-*.log
-
-# OS Files
+# OS
 .DS_Store
 Thumbs.db
 
-# IDE / Editor
+# IDE
 .vscode/
 .idea/
-
-# Temporary / Backup Files
-*.tmp
-*.bak
-*.swp
