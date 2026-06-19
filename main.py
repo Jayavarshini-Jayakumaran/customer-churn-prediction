@@ -1,7 +1,3 @@
-"""
-main.py — Customer Churn Prediction Pipeline
-"""
-
 import os, sys, warnings
 warnings.filterwarnings("ignore")
 

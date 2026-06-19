@@ -6,7 +6,7 @@ __pycache__/
 venv/
 .env
 
-# Data (never commit raw data)
+# Data
 data/raw/
 data/processed/
 

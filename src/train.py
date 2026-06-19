@@ -1,7 +1,3 @@
-"""
-train.py — Train four classifiers with SMOTE oversampling; return all results.
-"""
-
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -16,17 +12,8 @@ from xgboost import XGBClassifier
 from imblearn.over_sampling import SMOTE
 
 
-# ── Public API ────────────────────────────────────────────────────────
-
+# Public API
 def train_all(X_train_sc, y_train, X_test_sc, y_test) -> tuple[dict, str]:
-    """
-    Oversample training set with SMOTE, fit four models, evaluate on test set.
-
-    Returns
-    -------
-    results   : dict  {model_name -> metrics dict}
-    best_name : str   name of the model with highest ROC-AUC
-    """
     X_res, y_res = SMOTE(random_state=42).fit_resample(X_train_sc, y_train)
 
     model_zoo = {
@@ -65,7 +52,6 @@ def train_all(X_train_sc, y_train, X_test_sc, y_test) -> tuple[dict, str]:
 
 
 def get_feature_importance(model, feature_names: list) -> pd.DataFrame:
-    """Return a DataFrame of features sorted by importance descending."""
     if hasattr(model, "feature_importances_"):
         scores = model.feature_importances_
     elif hasattr(model, "coef_"):

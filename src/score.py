@@ -1,7 +1,3 @@
-"""
-score.py — Assign churn probability and risk tier to every customer.
-"""
-
 import pandas as pd
 import numpy as np
 
@@ -9,8 +5,7 @@ THRESHOLDS = {"low": 0.30, "high": 0.60}
 TIERS      = ["Low (<30%)", "Medium (30-60%)", "High (>60%)"]
 
 
-# ── Public API ────────────────────────────────────────────────────────
-
+# Public API
 def score_all_customers(
     df_raw      : pd.DataFrame,
     model,
@@ -18,21 +13,7 @@ def score_all_customers(
     imputer,
     df_encoded  : pd.DataFrame,
 ) -> pd.DataFrame:
-    """
-    Run the full dataset through the fitted model and return a scored frame.
-
-    Parameters
-    ----------
-    df_raw    : original dataframe (for readable columns like customerID)
-    model     : fitted sklearn / xgboost model
-    scaler    : fitted StandardScaler
-    imputer   : fitted SimpleImputer
-    df_encoded: numerically encoded feature matrix (no customerID / Churn)
-
-    Returns
-    -------
-    DataFrame sorted by churn_probability descending
-    """
+   
     X_sc   = scaler.transform(imputer.transform(df_encoded))
     proba  = model.predict_proba(X_sc)[:, 1]
 

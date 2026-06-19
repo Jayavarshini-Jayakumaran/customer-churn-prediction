@@ -1,25 +1,16 @@
-"""
-display.py — Customer-facing terminal output for the churn pipeline.
-             Clean, minimal, no decorative symbols or noise.
-"""
-
 import pandas as pd
 
 W = 60
 
-
 def _rule():
     print("-" * W)
-
 
 def _section(title: str):
     print()
     print(title.upper())
     _rule()
 
-
-# ── Public print functions ────────────────────────────────────────────
-
+# Public print functions 
 def print_header():
     _rule()
     print("  CUSTOMER CHURN PREDICTION  |  TELCO DATASET")

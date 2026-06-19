@@ -1,7 +1,3 @@
-"""
-preprocess.py — Load, clean, feature-engineer, encode, and split the Telco dataset.
-"""
-
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
@@ -9,8 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 
 
-# ── Public API ────────────────────────────────────────────────────────
-
+# Public API 
 def load_and_clean(path: str) -> pd.DataFrame:
     """Read CSV, fix TotalCharges, binarise Churn."""
     df = pd.read_csv(path)
@@ -21,7 +16,6 @@ def load_and_clean(path: str) -> pd.DataFrame:
 
 
 def engineer_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Add derived columns that improve predictive signal."""
     df = df.copy()
 
     # Spend rate (handles tenure=0 customers)
