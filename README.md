@@ -63,10 +63,10 @@ python main.py
 - Top churn driver: `avg_monthly_spend`
 
 ---
-📧 **Email**- [jayavarshinijayakumaran11@gmail.com](mailto:jayavarshinijayakumaran11@gmail.com)
+📧 **Email** - [jayavarshinijayakumaran11@gmail.com](mailto:jayavarshinijayakumaran11@gmail.com)
 
-🙌 **Connect**- [LinkedIn: Jayavarshini Jayakumaran](https://www.linkedin.com/in/jayavarshini-jayakumaran)
+🙌 **Connect** - [LinkedIn: Jayavarshini Jayakumaran](https://www.linkedin.com/in/jayavarshini-jayakumaran)
 
-📄 **License**- [MIT](LICENSE)
+📄 **License** - [MIT](LICENSE)
 
 <p align="center"><b>Finish what you started 💻</b></p>
