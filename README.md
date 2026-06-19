@@ -17,14 +17,23 @@ Source: [Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)
 customer-churn-prediction/
 ├── main.py
 ├── requirements.txt
-├── data/raw/telco_churn.csv
-├── notebooks/churn_pipeline.ipynb
+├── data/
+│   └── raw/
+│       └── telco_churn.csv
+├── notebooks/
+│   ├── 01_eda.ipynb
+│   ├── 02_preprocessing.ipynb
+│   ├── 03_feature_engineering.ipynb
+│   └── 04_modelling.ipynb
 └── src/
     ├── preprocess.py   # load, clean, feature engineering, encode, split
     ├── train.py        # train 4 models with SMOTE, select best by ROC-AUC
     ├── score.py        # score all customers, risk tiers, revenue summary
     └── display.py      # terminal output
 ```
+
+The `notebooks/` folder documents the experimental work that preceded the pipeline.  
+Each notebook is self-contained and does not import from `src/`.
 
 ---
 
@@ -54,10 +63,9 @@ python main.py
 - Top churn driver: `avg_monthly_spend`
 
 ---
-📧 **Email** — [jayavarshinijayakumaran11@gmail.com](mailto:jayavarshinijayakumaran11@gmail.com)
 
-🙌 **Connect** — [LinkedIn: Jayavarshini Jayakumaran](https://www.linkedin.com/in/jayavarshini-jayakumaran)
-
-📄 **License** — [MIT](LICENSE)
+📧 [jayavarshinijayakumaran11@gmail.com](mailto:jayavarshinijayakumaran11@gmail.com)  
+🙌 [LinkedIn: Jayavarshini Jayakumaran](https://www.linkedin.com/in/jayavarshini-jayakumaran)  
+📄 [MIT License](LICENSE)
 
 <p align="center"><b>Finish what you started 💻</b></p>
