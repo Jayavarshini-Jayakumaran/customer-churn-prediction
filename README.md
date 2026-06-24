@@ -1,4 +1,4 @@
-# Customer Churn Prediction — Telco
+# Customer Churn Prediction - Telco
 
 End-to-end ML pipeline to predict customer churn, segment by risk tier, and estimate revenue at risk.
 
